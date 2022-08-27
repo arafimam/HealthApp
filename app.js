@@ -56,7 +56,17 @@ app.get("/diet", validateToken, async function(req,res){
     var username = getName();
     const user = await Calorie.findOne({username}).lean();
     if (user.RequiredCalorie > user.calorieIntake){
-
+        // calorie deficit.
+        res.render("diet",{message:calorieDeficit});
+    }
+    else if (user.RequiredCalorie < user.calorieIntake){
+        res.render("diet",{message: calorieSurplus})
+    }
+    else if (user.RequiredCalorie === user.calorieIntake && user.RequiredCalorie != 0){
+        res.render("diet",{message:"Perfect calorie intake! Maintain this."})
+    }
+    else {
+        res.render("diet",{message: ""});
     }
 })
 
@@ -84,6 +94,51 @@ app.get("/profile",validateToken,async function(req,res){
 })
 
 
+app.get("/exercise", validateToken, async function(req,res){
+    // check health database and retrieve bmi value.
+    var username = getName();
+    const user = await Health.findOne({username}).lean();
+    const bmiValue = user.bmi;
+    // check calorie database and retrieve calorie difference.
+    const data = await Calorie.findOne({username}).lean();
+    const calorieIntake = data.calorieIntake;
+    const requiredCalorie = data.RequiredCalorie;
+    // calorie surplus+ overweight+ obese.
+    if (calorieIntake > requiredCalorie && bmiValue>25 ){
+        res.render("exercise",{calorieMessage: "Since you have a calorie surplus lower calorie intake by: "+(calorieIntake-requiredCalorie),gymMessage: "Number of calories you must burn daily: "+(200)});
+    }
+    // calorie surplus + underWeight
+    else if (calorieIntake>requiredCalorie && bmiValue<18.5 ){
+        res.render("exercise",{calorieMessage: "your calorie intake seems fine.",gymMessage: "Number of calories you may burn daily: "+(calorieIntake-requiredCalorie)});
+
+    }
+    // calorie surplus + healthy bmi
+    else if (calorieIntake>requiredCalorie && (bmiValue>=18.5 && bmiValue <=24.9)){
+        res.render("exercise",{calorieMessage: "you calorie intake seems fine.",gymMessage: "Number of calories you may burn daily: "+(calorieIntake-requiredCalorie)});
+
+    }
+
+    //calorie deficit + overweight bmi
+    else if (calorieIntake < requiredCalorie && bmiValue>25 ){
+        res.render("exercise",{calorieMessage: "Your calorie intake seems. Try increasing intake a bit more!",gymMessage: "Number of calories you must burn daily: "+ 200});
+    }
+    // calorie deficit + underWeight
+    else if (calorieIntake<requiredCalorie && bmiValue<18.5 ){
+        res.render("exercise",{calorieMessage: "Increase your calorie intake by "+ (requiredCalorie-calorieIntake),gymMessage: " some light workout is good!"});
+    }
+    // calorie deficit + healthy bmi
+    else if (calorieIntake<requiredCalorie && (bmiValue>=18.5 && bmiValue <=24.9)){
+        res.render("exercise",{calorieMessage: "additional calorie intake required: "+ (requiredCalorie-calorieIntake),gymMessage: "some light workout is good!"});
+
+    }
+    else{
+        res.render("exercise",{calorieMessage: "we will include cases like you as our app develops.",gymMessage:""})
+    }
+
+    //res.render("exercise");
+})
+
+
 /**
  * Post request from diet route.
  * This function calculates the user total calorie intake and also calculates the required calorie based on:
@@ -95,13 +150,13 @@ app.post("/diet", async function(req,res){
     var dinner = parseFloat(req.body.dinnerCal); 
     var other = parseFloat(req.body.otherCal);
     const totalCalorie = breakfast+lunch+dinner+other;
-    console.log("Total calories : " + totalCalorie);
+    
     
     // calculate the required calorie. 
     const username = getName();
-    console.log("Username" + username);
+    
     const user = await Health.findOne({username}).lean();
-    console.log(user);
+    
     if (user === null){
         res.redirect("/login");
     }
@@ -112,7 +167,9 @@ app.post("/diet", async function(req,res){
     }else if (user.gender === 'Female' ){
         requiredCalorie =  (9.99 * user.weight) + (6.25* user.height) - (4.92* user.age) -161;
     }
-    console.log(requiredCalorie);
+    console.log("Required Calorie: "+ requiredCalorie);
+    console.log("Total calorie: " + totalCalorie);
+    
     Calorie.findOneAndUpdate({username},{RequiredCalorie: requiredCalorie, calorieIntake: totalCalorie },(err,data) =>{
         if (err){
             console.log("calorie database not updated");
@@ -135,6 +192,7 @@ app.post("/profile",async function(req,res){
     const gender = req.body.gender;
     var username= getName();
     const BMI = weight / (height*height);
+    console.log("BMI value" + BMI);
     Health.findOneAndUpdate({username: username},{height: height,weight: weight,bmi: BMI,age: age,gender: gender},(err,data) => {
         if (err){
             console.log("Health db not updated");
@@ -155,7 +213,7 @@ app.post("/login", async function(req,res){
     const {username,password}=req.body;
 
     const user = await User.findOne({username}).lean()
-    console.log(user);
+    
     if (!user){
         // incorrect username or password --> need refactoring to show message in screen.
         console.log("incorrect username")
@@ -190,14 +248,13 @@ app.post("/register",async function(req,res){
     const {username, password: plainTextPassword} = req.body;
     
     const password = await bcrypt.hash(plainTextPassword,10)
-    console.log("Hashed Password: "+ password);
+    
     try{
         const response = await User.create({
             username,
             password
         })
-        console.log("Registered user.")
-        console.log(response);
+        
 
         const healthData = await Health.create({
             username: username,
@@ -207,18 +264,13 @@ app.post("/register",async function(req,res){
             age: 0,
             gender: "Not Selected"
         })
-        console.log("Printing health data.")
-        console.log(healthData);
+        
 
         const calorieData = await Calorie.create({
             username: username,
             RequiredCalorie: 0, // default values.
             calorieIntake: 0
         })
-
-        console.log("Printing calorie data: ");
-        console.log(calorieData);
-
 
         res.redirect("login")
     }catch(error){
