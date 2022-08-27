@@ -1,0 +1,22 @@
+<h1>Hello</h1>
+<h2><%= user %></h2>
+<form method="post" action="/profile">
+    <input type="text"  name="height" placeholder="height (in meters)">
+    <input type="text"  name="weight" placeholder="weight (kg)">
+    <input type = "number" name="age" placeholder="age">
+    <input type="radio" id="html" name="gender" value="Male">
+    <label for="html">Male</label><br>
+    <input type="radio" id="css" name="gender" value="Female">
+   <label for="css">Female</label><br>
+    <button type="submit">Submit</button>
+</form>
+
+<h1>BMI: </h1>
+<% if (bmi != 0 ){ %>
+    <p> <%= bmi %> </p>
+    <p> <%= message %></p>
+<% } %>
+
+
+<a href="/diet" >Check your diet</a>
+
