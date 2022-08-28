@@ -1,22 +1,78 @@
-<h1>Hello</h1>
-<h2><%= user %></h2>
-<form method="post" action="/profile">
-    <input type="text"  name="height" placeholder="height (in meters)">
-    <input type="text"  name="weight" placeholder="weight (kg)">
-    <input type = "number" name="age" placeholder="age">
-    <input type="radio" id="html" name="gender" value="Male">
-    <label for="html">Male</label><br>
-    <input type="radio" id="css" name="gender" value="Female">
-   <label for="css">Female</label><br>
-    <button type="submit">Submit</button>
-</form>
+<% layout('/layouts/boilerplate') %>
+    
+<h3>Hello! <span class="badge bg-secondary"><%= user %></span> </h3>
 
-<h1>BMI: </h1>
-<% if (bmi != 0 ){ %>
-    <p> <%= bmi %> </p>
-    <p> <%= message %></p>
-    <a href="/diet" >Check your diet</a>
-<% } %>
+
+<div class="card">
+    <div class="card-body">
+      
+      <h6 class="card-subtitle mb-2 text-muted">Body Parameters</h6>
+      <p class="card-text">To calculate your BMI and check your diet and exercise plan, please enter the following!</p>
+      
+      <form method="post" action="/profile" novalidate class="validated-form">
+        <div class="row g-3">
+            <div class="col">
+              <input type="text" class="form-control" name="height" placeholder="Enter your height (in meters)" required>
+              <div class="valid-feedback">
+                Looks Good!
+              </div>
+            </div>
+            <div class="col">
+              <input type="text" class="form-control" name="weight" placeholder="Enter your weight (kg)" required>
+              <div class="valid-feedback">
+                Looks Good!
+              </div>
+            </div>
+            <div class="col">
+                <input type="number" class="form-control" name="age" placeholder="Enter your age" required>
+                <div class="valid-feedback">
+                    Looks Good!
+                  </div>
+              </div>
+        </div>
+    
+        
+        <div class="form-check form-check-inline mt-3">
+            <p>Please enter your gender:</p> 
+
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="gender" value="Male" id="html">
+                <label class="form-check-label" for="html">Male</label> <br>
+            </div>
+
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="gender" id="css" value="Female">
+                <label class="form-check-label" for="css">Female</label> <br>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center">
+
+            <button type="submit" class="btn btn-outline-info ">Submit</button>
+
+        </div>
+        
+    
+    </form>
+    </div>
+  </div>
+
+
+<div class="card">
+    <h5 class="card-header mb-2 text-muted">BMI</h5>
+    <div class="card-body mt-3">
+
+        <div class="card-text text-center">
+            <h2 class="mb-2 text-muted">Your BMI is: </h2>
+            <% if (bmi != 0 ){ %>
+            <h3><span class="badge bg-secondary"><%= bmi %></span></h3>  
+            <h5> <span class="badge bg-dark"><%= message %></span></h5>
+            <a class="btn btn-outline-warning" href="/diet" >Check your diet</a>
+            <% } %>
+        </div> 
+
+    </div>
+</div>
+
 
 
 

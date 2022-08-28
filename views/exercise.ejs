@@ -1,3 +1,13 @@
-<h1> Health Report Suggestion:</h1>
-<p><%= calorieMessage %></p>
-<p><%= gymMessage %></p>
+<% layout('/layouts/boilerplate') %>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-header mb-2 text-muted text-center">Health Report Suggestion</h5>
+    </div>
+
+    <div class="card-text text-center">
+        <h3><span class="badge text-bg-warning"><%= calorieMessage %></span></h3>
+        <h3> <span class="badge text-bg-secondary"><%= gymMessage %></span></h3>
+
+    </div>
+</div>
+    
