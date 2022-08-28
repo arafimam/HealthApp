@@ -170,8 +170,7 @@ app.post("/diet", async function(req,res){
     }else if (user.gender === 'Female' ){
         requiredCalorie =  (9.99 * user.weight) + (6.25* user.height) - (4.92* user.age) -161;
     }
-    console.log("Required Calorie: "+ requiredCalorie);
-    console.log("Total calorie: " + totalCalorie);
+    
     
     Calorie.findOneAndUpdate({username},{RequiredCalorie: requiredCalorie, calorieIntake: totalCalorie },(err,data) =>{
         if (err){
@@ -195,7 +194,7 @@ app.post("/profile",async function(req,res){
     const gender = req.body.gender;
     var username= getName();
     const BMI = weight / (height*height);
-    console.log("BMI value" + BMI);
+   
     Health.findOneAndUpdate({username: username},{height: height,weight: weight,bmi: BMI,age: age,gender: gender},(err,data) => {
         if (err){
             console.log("Health db not updated");
