@@ -4,6 +4,7 @@
 const express = require('express')
 const app = express()
 const ejs = require("ejs");
+const ejsMate = require('ejs-mate') // this npm package will allow the basic layout to be reused in all views without cloning the layout for every view
 const bcrypt = require('bcryptjs')
 const User = require("./models/user")
 const Health = require("./models/health")
@@ -15,6 +16,8 @@ const bodyParser = require('body-parser')
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(cookieParser());
+
+app.engine('ejs', ejsMate) // sets up ejsMate for the app to use
 
 /**
  * All front end messages defined here.
